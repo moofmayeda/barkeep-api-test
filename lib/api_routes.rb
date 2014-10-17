@@ -13,7 +13,7 @@ class BarkeepServer < Sinatra::Base
   end
 
   # API routes that don't require authentication
-  AUTHENTICATION_WHITELIST_ROUTES = ["/api/commits/"]
+  AUTHENTICATION_WHITELIST_ROUTES = ["/api/commits/", "/api/stats"]
   # API routes that require admin
   ADMIN_ROUTES = ["/api/add_repo"]
   # How out of date an API call may be before it is rejected
@@ -57,6 +57,12 @@ class BarkeepServer < Sinatra::Base
       api_error 404, e.message
     end
     format_commit_data(commit, params[:repo_name], fields).to_json
+  end
+
+  get "/api/stats" do
+    fields = params[:fields] ? params[:fields].split(",") : nil
+    data = {"stuff" => 5}
+    data.to_json
   end
 
   # NOTE(caleb): Large GET requests are rejected by the Ruby web servers we use. (Unicorn, in particular,
