@@ -4,6 +4,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "http://files.vagrantup.com/lucid64.box"
   config.vm.provision :shell, :inline =>
       "sudo mkdir -p /root/.ssh && sudo cp /home/vagrant/.ssh/authorized_keys /root/.ssh/"
+  config.vm.synced_folder "/Users/moofmayeda/sites/barkeep", "/home/vagrant/barkeep"
 
   # Forward a port from the guest to the host, which allows for outside
   # computers to access the VM, whereas host only networking does not.
