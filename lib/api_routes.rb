@@ -61,8 +61,7 @@ class BarkeepServer < Sinatra::Base
 
   get "/api/stats" do
     fields = params[:fields] ? params[:fields].split(",") : nil
-    data = {"stuff" => 5}
-    data.to_json
+    format_stats().to_json
   end
 
   # NOTE(caleb): Large GET requests are rejected by the Ruby web servers we use. (Unicorn, in particular,
@@ -95,6 +94,11 @@ class BarkeepServer < Sinatra::Base
       :link => "http://#{BARKEEP_HOSTNAME}/commits/#{params[:repo_name]}/#{commit.sha}"
     }
     fields ? commit_data.select { |key, value| fields.include? key.to_s } : commit_data
+  end
+
+  def format_stats
+    data = {"num_commits" => Stats.num_commits("2014-10-01"),
+            "num_unreviewed_commits" => Stats.num_unreviewed_commits("2014-10-01")}
   end
 
   # Check that an authenticated request is properly formed and correctly signed. Returns the user if
