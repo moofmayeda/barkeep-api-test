@@ -96,14 +96,24 @@ class BarkeepServer < Sinatra::Base
     fields ? commit_data.select { |key, value| fields.include? key.to_s } : commit_data
   end
 
+  def format_user_data(user_ids_and_counts)
+    user_ids_and_counts.map do |id_and_count|
+      id_and_count[1] = { "count" => id_and_count[1] }
+      id_and_count << { "email" => id_and_count[0].email }
+      id_and_count << { "name" => id_and_count[0].name }
+      id_and_count.shift
+      return [id_and_count]
+    end
+  end
+
   def format_stats(since)
     data = {"num_commits" => Stats.num_commits(since),
             "num_unreviewed_commits" => Stats.num_unreviewed_commits(since),
             "num_reviewed_without_lgtm_commits" => Stats.num_reviewed_without_lgtm_commits(since),
             "num_lgtm_commits" => Stats.num_lgtm_commits(since),
             "chatty_commits" => Stats.chatty_commits(since),
-            "top_reviewers" => Stats.top_reviewers(since),
-            "top_approvers" => Stats.top_approvers(since)}
+            "top_reviewers" => format_user_data(Stats.top_reviewers(since)),
+            "top_approvers" => format_user_data(Stats.top_approvers(since))}
   end
 
   # Check that an authenticated request is properly formed and correctly signed. Returns the user if
