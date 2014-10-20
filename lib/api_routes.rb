@@ -97,8 +97,14 @@ class BarkeepServer < Sinatra::Base
   end
 
   def format_stats
-    data = {"num_commits" => Stats.num_commits("2014-10-01"),
-            "num_unreviewed_commits" => Stats.num_unreviewed_commits("2014-10-01")}
+    since = Time.now - 60 * 60 * 24 *30
+    data = {"num_commits" => Stats.num_commits(since),
+            "num_unreviewed_commits" => Stats.num_unreviewed_commits(since),
+            "num_reviewed_without_lgtm_commits" => Stats.num_reviewed_without_lgtm_commits(since),
+            "num_lgtm_commits" => Stats.num_lgtm_commits(since),
+            "chatty_commits" => Stats.chatty_commits(since),
+            "top_reviewers" => Stats.top_reviewers(since),
+            "top_approvers" => Stats.top_approvers(since)}
   end
 
   # Check that an authenticated request is properly formed and correctly signed. Returns the user if
