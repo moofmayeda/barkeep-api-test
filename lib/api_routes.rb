@@ -60,8 +60,8 @@ class BarkeepServer < Sinatra::Base
   end
 
   get "/api/stats" do
-    fields = params[:fields] ? params[:fields].split(",") : nil
-    format_stats().to_json
+    since = params[:since] ? params[:since] : Time.now - 60 * 60 * 24 * 30
+    format_stats(since).to_json
   end
 
   # NOTE(caleb): Large GET requests are rejected by the Ruby web servers we use. (Unicorn, in particular,
@@ -96,8 +96,7 @@ class BarkeepServer < Sinatra::Base
     fields ? commit_data.select { |key, value| fields.include? key.to_s } : commit_data
   end
 
-  def format_stats
-    since = Time.now - 60 * 60 * 24 *30
+  def format_stats(since)
     data = {"num_commits" => Stats.num_commits(since),
             "num_unreviewed_commits" => Stats.num_unreviewed_commits(since),
             "num_reviewed_without_lgtm_commits" => Stats.num_reviewed_without_lgtm_commits(since),
