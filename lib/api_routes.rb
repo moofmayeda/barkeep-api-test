@@ -98,11 +98,9 @@ class BarkeepServer < Sinatra::Base
 
   def format_user_data(user_ids_and_counts)
     user_ids_and_counts.map do |id_and_count|
-      id_and_count[1] = { "count" => id_and_count[1] }
-      id_and_count << { "email" => id_and_count[0].email }
-      id_and_count << { "name" => id_and_count[0].name }
-      id_and_count.shift
-      return [id_and_count]
+      {:count => id_and_count[1],
+        :name => id_and_count[0].name,
+        :email => id_and_count[0].email}
     end
   end
 
@@ -116,8 +114,16 @@ class BarkeepServer < Sinatra::Base
     chatty_commits.map! do |commit|
       {:sha => commit.sha,
         :comment_count => commit[:count],
-        :repo_name => commit[:repo],
+        :repo_name => commit[:repo]
         }
+    end
+    chatty_commits.map! do |commit|
+      commit_obj = Commit.prefix_match commit[:repo_name], commit[:sha]
+      {:sha => commit_obj.sha,
+        :comment_count => commit_obj.comment_count,
+        :message => commit_obj.message,
+        :repo_name => commit[:repo_name],
+        :approved => commit_obj.approved?}
     end
     data = {"num_commits" => Stats.num_commits(since),
             "num_unreviewed_commits" => Stats.num_unreviewed_commits(since),
