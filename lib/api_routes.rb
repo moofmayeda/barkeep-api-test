@@ -107,11 +107,23 @@ class BarkeepServer < Sinatra::Base
   end
 
   def format_stats(since)
+    dataset = Commit.
+      join(:comments, :commit_id => :id).
+      filter("`comments`.`created_at` > ?", since).
+      join(:git_repos, :id => :commits__git_repo_id).
+      group_and_count(:commits__sha, :git_repos__name___repo).order(:count.desc).limit(10)
+    chatty_commits = dataset.all
+    chatty_commits.map! do |commit|
+      {:sha => commit.sha,
+        :comment_count => commit[:count],
+        :repo_name => commit[:repo],
+        }
+    end
     data = {"num_commits" => Stats.num_commits(since),
             "num_unreviewed_commits" => Stats.num_unreviewed_commits(since),
             "num_reviewed_without_lgtm_commits" => Stats.num_reviewed_without_lgtm_commits(since),
             "num_lgtm_commits" => Stats.num_lgtm_commits(since),
-            "chatty_commits" => Stats.chatty_commits(since),
+            "chatty_commits" => chatty_commits,
             "top_reviewers" => format_user_data(Stats.top_reviewers(since)),
             "top_approvers" => format_user_data(Stats.top_approvers(since))}
   end
